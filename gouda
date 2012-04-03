@@ -6,7 +6,7 @@ import os
 import json
 
 PORT = 50007              # The same port as used by the server
-error = "Error: goudabot not running on port " + PORT
+error = "Error: goudabot not running on port " + str(PORT)
 
 def send(command):
     HOST = 'localhost'    # The remote host
