@@ -22,7 +22,10 @@ def execute(commands):
 
     if path.isfile(command):
         try:
-            return check_output(shlex.split(combine(args)))
+            run = shlex.split(combine(args))
+            print "Running:"
+            print run
+            return check_output(run)
         except CalledProcessError as err: 
             return err.output
 
