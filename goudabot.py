@@ -1,7 +1,7 @@
 #! /usr/bin/python
 import SocketServer
 import json
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 from os import path
 import shlex
 
