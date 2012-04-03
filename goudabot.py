@@ -12,10 +12,10 @@ script_dir = './scripts/'
 
 
 def execute(commands):
- 
+
     if len(commands) <= 1:
         return USAGE
-    
+
     command = script_dir + commands[0]
     args = commands[1:]
     args.insert(0, command)
@@ -26,16 +26,18 @@ def execute(commands):
             print "Running:"
             print run
             return check_output(run)
-        except CalledProcessError as err: 
+        except CalledProcessError as err:
             return err.output
 
     return USAGE
+
 
 def combine(lis):
     result = ''
     for i in lis:
         result += str(i) + " "
     return result[:-1]
+
 
 class GoudaHandler(SocketServer.BaseRequestHandler):
 
@@ -44,6 +46,7 @@ class GoudaHandler(SocketServer.BaseRequestHandler):
         self.data = self.request.recv(1024).strip()
         result = execute(json.loads(self.data))
         self.request.sendall(result)
+
 
 class GoudaBot(SocketServer.TCPServer):
     allow_reuse_address = True
