@@ -8,6 +8,7 @@ import json
 PORT = 50007              # The same port as used by the server
 error = "Error: goudabot not running on port " + str(PORT)
 
+
 def send(command):
     HOST = 'localhost'    # The remote host
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -17,10 +18,10 @@ def send(command):
         data = s.recv(1024)
         s.close()
         print repr(data)
-    except: 
+    except:
         print error
 
 if __name__ == '__main__':
-	sys.argv.append(os.getcwd())
-	command = json.dumps(sys.argv[1:])
-	send(command)
+    sys.argv.append(os.getcwd())
+    command = json.dumps(sys.argv[1:])
+    send(command)
