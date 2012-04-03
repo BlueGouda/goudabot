@@ -1,35 +1,38 @@
 #! /usr/bin/python
 import SocketServer
 import json
-import argparse
+from subprocess import check_output
+from os import path
+import shlex
 
 PORT = 50007
 
-USAGE = "This a gouda bot! usage: gouda build OR gouda init name"
+USAGE = "This a gouda bot! usage: gouda script [arg ...]"
+script_dir = './scripts/'
+
 
 def execute(commands):
  
     if len(commands) <= 1:
         return USAGE
     
-    dir = commands[0]
-    command = commands[1].lower()
-    
-    if command == "build":
-        build(dir)
-        return "Project at " + dir + " built!"
-    
-    elif command == "init" and len(commands) > 2:
-        init(commands[2])
-        return "Project " + commands[2] + " initiated."
-    
+    command = script_dir + commands[0]
+    args = commands[1:]
+    args.insert(0, command)
+
+    if path.isfile(command):
+        try:
+            return check_output(shlex.split(combine(args)))
+        except CalledProcessError as err: 
+            return err.output
+
     return USAGE
 
-def build(dir):
-    print "building " + dir
-
-def init(name):
-    print "init " + name
+def combine(lis):
+    result = ''
+    for i in lis:
+        result += str(i) + " "
+    return result[:-1]
 
 class GoudaHandler(SocketServer.BaseRequestHandler):
 
@@ -43,9 +46,9 @@ class GoudaBot(SocketServer.TCPServer):
     allow_reuse_address = True
 
 
-
 if __name__ == "__main__":
     HOST = "localhost"
+
     # Create the server, binding to localhost on port 9999
     server = GoudaBot((HOST, PORT), GoudaHandler)
 
