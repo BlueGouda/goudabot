@@ -17,11 +17,11 @@ def send(command):
         s.sendall(command)
         data = s.recv(1024)
         s.close()
-        print repr(data)
+        print data
     except:
         print error
 
 if __name__ == '__main__':
-    sys.argv.append(os.getcwd())
+    sys.argv.append('-d ' + os.getcwd())
     command = json.dumps(sys.argv[1:])
     send(command)

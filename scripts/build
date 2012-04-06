@@ -1,3 +1,75 @@
-#! /usr/bin/python
+#!/usr/bin/env bash
+# Argument = project_name
+# Option parsing from https://rsalveti.wordpress.com/2007/04/03/bash-parsing-arguments-with-getopts/
 
-print "BUILT!!!"
+PROJECT_DIR=/git/
+
+usage()
+{
+cat << DONE
+	usage: ./build project_name [options]
+
+	Use this script to build and deploy your site to the dev stage.
+
+	OPTIONS:
+	-h      Show this message
+	-d 		Set current directory
+	-v      Verbose
+DONE
+}
+PROJECT=$1
+VERBOSE=
+CURRENT_DIR=
+while getopts “hvd:” OPTION
+do
+  case $OPTION in
+      h)
+          usage
+          exit 1
+          ;;
+      v)
+          VERBOSE=1
+          ;;
+      d)
+          CURRENT_DIR=$OPTARG
+          ;;
+      ?)
+          usage
+          exit
+          ;;
+  esac
+done
+
+if [ ! -d $PROJECT_DIR$PROJECT ]
+	then
+	echo
+	echo "Error: Project doesn't exist."
+	echo
+	usage
+	exit 1
+fi
+
+cd /tmp
+rm -rf /tmp/$PROJECT
+git clone $PROJECT_DIR$PROJECT
+cd $PROJECT
+nanoc
+
+if [ ! -d /tmp/$PROJECT/publish ]
+	then
+	echo
+	echo "Error: Project doesn't seem to be a Nanoc site."
+	echo
+	usage
+	exit 1
+fi
+
+if [ ! -d /home/gouda/public/dev/$PROJECT ]
+	then
+	mkdir /home/gouda/public/dev/$PROJECT
+fi
+
+echo "Copying site to dev stage..."
+cp -rf /tmp/$PROJECT/publish/* /home/gouda/public/dev/$PROJECT
+
+echo "DONE!"

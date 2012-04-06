@@ -2,8 +2,10 @@
 import SocketServer
 import json
 from subprocess import check_output, CalledProcessError
-from os import path
+import os
 import shlex
+import daemon
+import lockfile
 
 PORT = 50007
 
@@ -14,13 +16,14 @@ script_dir = './scripts/'
 def execute(commands):
 
     if len(commands) <= 1:
+        return "debug1"
         return USAGE
 
     command = script_dir + commands[0]
     args = commands[1:]
     args.insert(0, command)
 
-    if path.isfile(command):
+    if os.path.isfile(command):
         try:
             run = shlex.split(combine(args))
             print "Running:"
@@ -29,6 +32,7 @@ def execute(commands):
         except CalledProcessError as err:
             return err.output
 
+    return command
     return USAGE
 
 
@@ -52,7 +56,7 @@ class GoudaBot(SocketServer.TCPServer):
     allow_reuse_address = True
 
 
-if __name__ == "__main__":
+def main():
     HOST = "localhost"
 
     # Create the server, binding to localhost on port 9999
@@ -61,3 +65,12 @@ if __name__ == "__main__":
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
     server.serve_forever()
+
+
+if __name__ == "__main__":
+    context = daemon.DaemonContext(
+        working_directory=os.getcwd(),
+        pidfile=lockfile.FileLock(os.getcwd() + '/lock.pid'),
+    )
+    with context:
+        main()
