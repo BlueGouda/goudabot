@@ -13,7 +13,7 @@ cat << DONE
 
 	OPTIONS:
 	-h      Show this message
-	-d 		Set current directory
+	-d      Set current directory
 	-v      Verbose
 DONE
 }
@@ -53,16 +53,20 @@ cd /tmp
 rm -rf /tmp/$PROJECT
 git clone $PROJECT_DIR$PROJECT
 cd $PROJECT
-nanoc
 
-if [ ! -d /tmp/$PROJECT/publish ]
+if [ ! -f /tmp/$PROJECT/config.rb ]
 	then
 	echo
-	echo "Error: Project doesn't seem to be a Nanoc site."
+	echo "Error: Project doesn't seem to be a Middleman site."
 	echo
 	usage
 	exit 1
 fi
+
+PUBLISH=build
+
+echo "Compiling site..."
+middleman build -c
 
 if [ ! -d /home/gouda/public/dev/$PROJECT ]
 	then
@@ -70,6 +74,7 @@ if [ ! -d /home/gouda/public/dev/$PROJECT ]
 fi
 
 echo "Copying site to dev stage..."
-cp -rf /tmp/$PROJECT/publish/* /home/gouda/public/dev/$PROJECT
+cp -rf /tmp/$PROJECT/$PUBLISH/* /home/gouda/public/dev/$PROJECT
 
-echo "DONE!"
+echo "DONE! Compiled site at:"
+echo "$PROJECT.bluegouda.com"

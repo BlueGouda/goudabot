@@ -8,16 +8,13 @@ import daemon
 import lockfile
 
 PORT = 50007
-
-USAGE = "This a gouda bot! usage: gouda script [arg ...]"
 script_dir = './scripts/'
 
 
 def execute(commands):
 
     if len(commands) <= 1:
-        return "debug1"
-        return USAGE
+        return usage()
 
     command = script_dir + commands[0]
     args = commands[1:]
@@ -32,8 +29,15 @@ def execute(commands):
         except CalledProcessError as err:
             return err.output
 
-    return command
-    return USAGE
+    return usage()
+
+
+def usage():
+    dirList = os.listdir('./scripts')
+    cmds = ''
+    for cmd in dirList:
+        cmds += cmd + ", "
+    return "Command not found. Avaliable commands are: " + cmds[:-2]
 
 
 def combine(lis):

@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+# Option parsing from https://rsalveti.wordpress.com/2007/04/03/bash-parsing-arguments-with-getopts/
+
+GIT_DIR=~/git/
+TMP=/tmp/
+# BAD_CHAR=(  "\'" "+" "." "," "|" "!" "\"" "£" "$" "%" "&" "/" "(" ")" "=" "?" "^" "*" "ç" "°" "§" ";" ":" "_" ">" ] [ @ );)
+
+usage()
+{
+cat << DONE
+	usage: ./init project_name [options]
+
+	Initialize a new site.
+
+	OPTIONS:
+	-h      Show this message
+	-t      Template name
+	-v      Verbose
+DONE
+}
+
+PROJECT=$1
+VERBOSE=
+TEMPLATE=""
+while getopts “hvt:” OPTION
+do
+  case $OPTION in
+      h)
+          usage
+          exit 1
+          ;;
+      v)
+          VERBOSE=1
+          ;;
+      t)
+          TEMPLATE=$OPTARG
+          ;;
+      ?)
+          usage
+          exit
+          ;;
+  esac
+done
+
+gitinit()
+{
+	if [ -d $GIT_DIR$PROJECT ]
+		then
+		echo
+		echo "Error: This project already exists!"
+		echo
+		usage
+		exit 1
+	fi
+	
+	cd $GIT_DIR
+	git init --bare --shared $PROJECT
+	echo "Initialize complete!"
+}
+
+middlemake()
+{
+	if [ ! -d $GIT_DIR$PROJECT ]
+		then
+		echo
+		echo "Error: Git did not initialize correctly!"
+		echo
+		usage
+		exit 1
+	fi
+
+	echo "Making template..."
+	cd $TMP
+	rm -rf $PROJECT
+	git clone $GIT_DIR$PROJECT
+	middleman init $PROJECT --css-dir=css --js-dir=js --images-dir=img --bundler --template=html5
+	cd $TMP$PROJECT
+	git add .
+	git commit -m 'initial commit'
+	git push origin master
+	cd $TMP
+	rm -rf $PROJECT
+	echo "Template complete!"
+}
+
+if [[ "$PROJECT" == */* ]]
+then
+	usage
+	exit 1
+fi
+
+if [[ "$PROJECT" == "" ]]
+then
+	usage
+	exit 1
+fi
+
+echo "Initializing..."
+gitinit
+middlemake
+echo "Done!"

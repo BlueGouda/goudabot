@@ -15,7 +15,7 @@ def send(command):
     try:
         s.connect((HOST, PORT))
         s.sendall(command)
-        data = s.recv(1024)
+        data = s.recv(4096)
         s.close()
         print data
     except:

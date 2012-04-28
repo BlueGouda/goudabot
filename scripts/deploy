@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# Option parsing from https://rsalveti.wordpress.com/2007/04/03/bash-parsing-arguments-with-getopts/
+
+DEV_DIR=~/public/dev/
+BAK_DIR=~/public/bak/
+PROD_DIR=~/public/production/
+
+usage()
+{
+cat << DONE
+	usage: ./deploy project_name [options]
+
+	Use this script to deploy your site to production.
+
+	OPTIONS:
+	-h      Show this message
+	-r      Restore site to last state
+	-v      Verbose
+DONE
+}
+
+PROJECT=$1
+VERBOSE=
+REVERSE=
+while getopts “hvr” OPTION
+do
+  case $OPTION in
+      h)
+          usage
+          exit 1
+          ;;
+      v)
+          VERBOSE=1
+          ;;
+      r)
+          REVERSE=1
+          ;;
+      ?)
+          usage
+          exit
+          ;;
+  esac
+done
+
+reverse()
+{
+	if [ ! -d $BAK_DIR$PROJECT ]
+		then
+		echo
+		echo "Error: There's no backup for this project!"
+		echo
+		usage
+		exit 1
+	fi
+
+	rm -rf $PROD_DIR$PROJECT
+	cp -r $BAK_DIR$PROJECT
+
+	echo "Restore complete!"
+}
+
+deploy()
+{
+	if [ ! -d $DEV_DIR$PROJECT ]
+		then
+		echo
+		echo "Error: Project is not in the dev stage. Please build the site first."
+		echo
+		usage
+		exit 1
+	fi
+
+	if [ -d $PROD_DIR$PROJECT ]
+		then
+		echo "Project already there, backing up..."
+		cp -rf $PROD_DIR$PROJECT $BAK_DIR
+		rm -rf $PROD_DIR$PROJECT
+	fi
+
+	echo "Deploying..."
+	cp -rf $DEV_DIR$PROJECT $PROD_DIR
+
+	echo "Deploy complete!"
+}
+
+if [ "$2" = "-r" ]
+then
+	reverse
+else
+	deploy
+fi
