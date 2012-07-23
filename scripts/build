@@ -63,16 +63,23 @@ if [ ! -f /tmp/$PROJECT/config.rb ]
 	exit 1
 fi
 
+if [ -f /tmp/$PROJECT/Gemfile.lock ]
+	then
+	rm /tmp/$PROJECT/Gemfile.lock
+fi
+
 PUBLISH=build
 
 echo "Compiling site..."
+bundle install
 middleman build -c
 
-if [ ! -d /home/gouda/public/dev/$PROJECT ]
+if [ -d /home/gouda/public/dev/$PROJECT ]
 	then
-	mkdir /home/gouda/public/dev/$PROJECT
+	rm -rf /home/gouda/public/dev/$PROJECT
 fi
 
+mkdir /home/gouda/public/dev/$PROJECT
 echo "Copying site to dev stage..."
 cp -rf /tmp/$PROJECT/$PUBLISH/* /home/gouda/public/dev/$PROJECT
 

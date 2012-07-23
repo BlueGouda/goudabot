@@ -3,7 +3,7 @@
 
 GIT_DIR=~/git/
 TMP=/tmp/
-# BAD_CHAR=(  "\'" "+" "." "," "|" "!" "\"" "£" "$" "%" "&" "/" "(" ")" "=" "?" "^" "*" "ç" "°" "§" ";" ":" "_" ">" ] [ @ );)
+BOILER=boilerplate
 
 usage()
 {
@@ -40,9 +40,9 @@ do
           exit
           ;;
   esac
-done
+done 
 
-gitinit()
+check()
 {
 	if [ -d $GIT_DIR$PROJECT ]
 		then
@@ -52,14 +52,13 @@ gitinit()
 		usage
 		exit 1
 	fi
-	
-	cd $GIT_DIR
-	git init --bare --shared $PROJECT
-	echo "Initialize complete!"
 }
 
-middlemake()
+generate()
 {
+	cd $GIT_DIR
+	git init --bare --shared $PROJECT
+	
 	if [ ! -d $GIT_DIR$PROJECT ]
 		then
 		echo
@@ -72,15 +71,25 @@ middlemake()
 	echo "Making template..."
 	cd $TMP
 	rm -rf $PROJECT
-	git clone $GIT_DIR$PROJECT
-	middleman init $PROJECT --css-dir=css --js-dir=js --images-dir=img --bundler --template=html5
-	cd $TMP$PROJECT
-	git add .
-	git commit -m 'initial commit'
+	git clone $GIT_DIR$BOILER
+	cd $BOILER
+	git remote rm origin
+	git remote add origin $GIT_DIR$PROJECT
 	git push origin master
 	cd $TMP
 	rm -rf $PROJECT
+	rm -rf $BOILER
 	echo "Template complete!"
+}
+
+createhook()
+{
+	cd $GIT_DIR$PROJECT/hooks
+	echo "#!/usr/bin/env bash" > post-receive
+	echo NAME=$PROJECT >> post-receive
+	echo "OUT=\`gouda build \$NAME\`" >> post-receive
+	echo echo \$OUT >> post-receive
+	chmod +x post-receive
 }
 
 if [[ "$PROJECT" == */* ]]
@@ -96,6 +105,7 @@ then
 fi
 
 echo "Initializing..."
-gitinit
-middlemake
+check
+generate
+createhook
 echo "Done!"
