@@ -4,11 +4,9 @@ import json
 from subprocess import check_output, CalledProcessError
 import os
 import shlex
-import daemon
-import lockfile
 
 PORT = 50007
-script_dir = './scripts/'
+script_dir = os.environ['GOUDABOT'] + '/scripts/'
 
 
 def execute(commands):
@@ -33,7 +31,7 @@ def execute(commands):
 
 
 def usage():
-    dirList = os.listdir('./scripts')
+    dirList = os.listdir(script_dir)
     cmds = ''
     for cmd in dirList:
         cmds += cmd + ", "
@@ -72,9 +70,4 @@ def main():
 
 
 if __name__ == "__main__":
-    context = daemon.DaemonContext(
-        working_directory=os.getcwd(),
-        pidfile=lockfile.FileLock(os.getcwd() + '/lock.pid'),
-    )
-    with context:
-        main()
+    main()
